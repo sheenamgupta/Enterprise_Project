@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>COURSE</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<link rel="stylesheet" type="text/css" href="style.css"/>
+
+</head>
+<body>
+
+<header>
+  <h2>COURSE</h2>
+</header>
+
+<section>
+  <nav>
+    <ul>
+      <li><a class="active" href="College.html">Home</a></li>
+      <li><a href="Course.html?id=all">View & Modify Course</a></li>
+      <li><a href="AddCourse.html?id=new">Add new Course</a></li>		  
+    </ul>
+  </nav>
+  
+  <article>
+  <div class="row">
+	<div class="container">
+		<div class="row">
+		  <h2>ADD/EDIT COURSE</h2>
+		
+		</div>
+		<div class="row">
+		  <div class="col-25">
+			<label for="cId"><b>COURSE ID</b></label>
+		  </div>
+		  <div class="col-75">
+			<input type="text" placeholder="Enter Course ID" id="cId" required>
+		  </div>
+		</div>
+		<div class="row">
+		  <div class="col-25">
+			<label for="cname"><b>COURSE NAME</b></label>
+		  </div>
+		  <div class="col-75">
+			<input type="text" placeholder="Enter Course name" id="cname" required>
+		  </div>
+		</div>
+		<div class="row">
+		  <div class="col-25">
+			<label for="desc"><b>DESCRIPTION</b></label>
+		  </div>
+		  <div class="col-75">
+			<input type="text" placeholder="Enter course description" id="desc" required>
+		  </div>
+		</div>
+		<div class="row">
+		  <div class="col-25">
+			<label for="pcode"><b>PROGRAM CODE</b></label>
+		  </div>
+		  <div class="col-75">
+			<input type="text" placeholder="Enter Program Code" id="pcode" required>
+		  </div>
+		</div>
+		<div class="row">
+		  <div class="col-25">
+			<label for="insId"><b>INSTRUCTED BY</b></label>
+		  </div>
+		  <div class="col-75">
+			<input type="text" placeholder="Enter Instructor Id" id="insId" required>
+		  </div>
+		</div>		
+		<div class="row">
+			<br><hr><br>
+			
+				<input type="submit" value="Update" id="btnUpdate" onclick="update()"/>
+				<input type="submit" value="Submit" id="btnSubmit" onclick="addNewInstructor()"/>
+			
+		</div>		
+	</div>
+</div>
+  </article>
+</section>
+
+
+<script>
+	$(document).ready(function(){
+	
+		var params = new window.URLSearchParams(window.location.search);
+		var courseId=params.get('id').toString(); //need to validate the query string
+		
+		if (courseId=="new")
+		{
+			$('#cId').val('');
+			$('#cname').val('');
+			$('#desc').val('');
+			$('#pcode').val('');
+			$('#insId').val('');
+			
+			$("#btnUpdate").hide();
+			$("#btnSubmit").show();
+		}
+		else
+		{
+			$("#btnUpdate").show();
+			$("#btnSubmit").hide();
+			$.ajax({
+			type: "GET",
+			url: "http://localhost:8080/api/courses/"+courseId,		
+			contentType: "application/json; charset=utf-8",
+			dataType: "json",
+			success: function(data){
+					console.log(data);
+					var cId=data[0]["c_id"].toString();
+					var cname=data[0]["c_name"].toString();
+					var desc=data[0]["c_description"].toString();
+					var pcode=data[0]["program_code"].toString();
+					var insId=data[0]["instructed_by"].toString();
+					
+					$('#cId').val(cId);
+					$('#cname').val(cname);
+					$('#desc').val(desc);
+					$('#pcode').val(pcode);
+					$('#insId').val(insId);
+				}
+			});		
+		}
+	});
+	
+	function update()
+	{
+		var params = new window.URLSearchParams(window.location.search);
+		var courseId=params.get('id').toString(); //validate the query string
+		
+		var cname=$('#cname').val();
+		var desc=$('#desc').val();
+		var pcode=$('#pcode').val();
+		var insId=$('#insId').val();
+		
+		$.ajax({
+			type: "PUT",
+			url: "http://localhost:8080/api/courses/"+courseId+"/"+cname+"/"+desc+"/"+pcode+"/"+insId,		
+			contentType: "application/json; charset=utf-8",
+			dataType: "json",
+			success: function(data){}
+			});	
+		top.location.href = "Course.html?id=all";
+	}
+	
+	function addNewInstructor()
+	{
+		var courseId=$('#cId').val();
+		var cname=$('#cname').val();
+		var desc=$('#desc').val();
+		var pcode=$('#pcode').val();
+		var insId=$('#insId').val();		
+		
+		$.ajax({
+			type: "POST",
+			url: "http://localhost:8080/api/courses/"+courseId+"/"+cname+"/"+desc+"/"+pcode+"/"+insId,		
+			contentType: "application/json; charset=utf-8",
+			dataType: "json",
+			success: function(data){}
+			});	
+		top.location.href = "Course.html?id=all";	
+	}
+</script>
+
+</body>
+</html>

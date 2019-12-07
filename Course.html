@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>COURSE</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<link rel="stylesheet" type="text/css" href="style.css"/>
+
+</style>
+</head>
+<body>
+
+<header>
+  <h2>COURSE</h2>
+</header>
+
+<section>
+  <nav>
+    <ul>
+      <li><a class="active" href="College.html">Home</a></li>
+      <li><a href="Course.html?id=all">View & Modify Course</a></li>
+      <li><a href="AddCourse.html?id=new">Add new Course</a></li>
+      	
+    </ul>
+  </nav>
+  
+  <article>
+	<p id="showData"></p>
+  </article>
+</section>
+
+
+<script>
+function displayAll()
+{
+	$.ajax({
+	type: "GET",
+	url: "http://localhost:8080/api/courses",
+	contentType: "application/json; charset=utf-8",
+	dataType: "json",
+	success: function(result){
+		console.log(result);
+		
+        var col = [];
+        for (var i = 0; i < result.length; i++) {
+            for (var key in result[i]) {
+                if (col.indexOf(key) === -1) {
+                    col.push(key);
+					console.log(key);
+                }
+            }
+        }	
+		// CREATE DYNAMIC TABLE.
+        var table = document.createElement("table");
+        // CREATE HTML TABLE HEADER ROW USING THE EXTRACTED HEADERS ABOVE.
+		var colHead = ['ID','Course Name','Description','Program Code','Instructed By','Edit','Delete'];
+        var tr = table.insertRow(-1);               // TABLE ROW.
+        for (var i = 0; i < colHead.length; i++) {
+            var th = document.createElement("th");      // TABLE HEADER.
+            th.innerHTML = colHead[i];
+            tr.appendChild(th);
+        }		
+		for (var i = 0; i < result.length; i++) {
+            tr = table.insertRow(-1);
+			var queryStr;
+            for (var j=0; j < col.length; j++) {
+                var tabCell = tr.insertCell(-1);
+                tabCell.innerHTML = result[i][col[j]];
+				if(j==0)
+				{
+					queryStr=result[i][col[j]];
+				}
+            }
+			
+			var tabCell = tr.insertCell(-1);
+			var queryStrEdit="AddCourse.html?id="+queryStr.toString();
+            tabCell.innerHTML = '<a id="linkEdit" href='+queryStrEdit+'>Edit</a>';
+			
+			var tabCell = tr.insertCell(-1);
+			var queryStrDelete="Course.html?id="+queryStr.toString();
+            tabCell.innerHTML = '<a id="linkDelete" href='+queryStrDelete+' >Delete</a>';
+        }
+		
+		// FINALLY ADD THE NEWLY CREATED TABLE WITH JSON DATA TO A CONTAINER.
+        var divContainer = document.getElementById("showData");
+        divContainer.innerHTML = "";
+        divContainer.appendChild(table);
+		
+		}
+	});
+}
+
+
+
+
+$(document).ready(function(){
+
+	//displayAll();
+	var params = new window.URLSearchParams(window.location.search);
+	var CourseId=params.get('id').toString(); //validate the query string
+		
+	if (CourseId=="all")
+	{
+		displayAll();
+	}
+	else
+	{
+		var result = confirm("Do you really want to delete this record?"); 
+		if (result == true) { 
+			deleteDocument(CourseId);
+		} 
+	}
+});
+
+function deleteDocument(CourseId)
+{
+	$.ajax({
+	type: "delete",
+	url: "http://localhost:8080/api/courses/"+CourseId,
+	contentType: "application/json; charset=utf-8",
+	dataType: "json",
+	success: function(result){}
+	});
+	top.location.href = "Course.html?id=all";	
+}
+
+
+
+</script>
+
+</body>
+</html>
